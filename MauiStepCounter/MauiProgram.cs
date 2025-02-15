@@ -1,4 +1,6 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using CommunityToolkit.Maui;
+using Microsoft.Extensions.Logging;
+using Plugin.Maui.Pedometer;
 
 namespace MauiStepCounter
 {
@@ -9,6 +11,7 @@ namespace MauiStepCounter
             var builder = MauiApp.CreateBuilder();
             builder
                 .UseMauiApp<App>()
+                .UseMauiCommunityToolkit()
                 .ConfigureFonts(fonts =>
                 {
                     fonts.AddFont("OpenSans-Regular.ttf", "OpenSansRegular");
@@ -16,7 +19,21 @@ namespace MauiStepCounter
                 });
 
 #if DEBUG
-    		builder.Logging.AddDebug();
+            builder.Logging.AddDebug();
+#endif
+
+#if ANDROID
+            builder.Services.AddSingleton(Pedometer.Default);
+
+            builder.Services.AddTransient<Services.IBackgroundService, Platforms.Android.Services.BackgroundService>();
+            builder.Services.AddTransient<Services.INotificationService, Platforms.Android.Services.NotificationService>();
+            builder.Services.AddTransient<Services.IPedometerService, Platforms.Android.Services.PedometerService>();
+#endif
+
+#if WINDOWS
+            builder.Services.AddTransient<Services.IBackgroundService, Platforms.Windows.Services.DummyBackgroundService>();
+            builder.Services.AddTransient<Services.INotificationService, Platforms.Windows.Services.DummyNotificationService>();
+            builder.Services.AddTransient<Services.IPedometerService, Platforms.Windows.Services.DummyPedometerService>();
 #endif
 
             return builder.Build();
