@@ -13,7 +13,7 @@ internal static class NotificationUtilities
         return new Notification.Builder(Platform.AppContext, GetNotificationChannelId())
                 .SetContentTitle(title)
                 .SetContentText(message)
-                .SetSmallIcon(Resource.Drawable.abc_ab_share_pack_mtrl_alpha)
+                .SetSmallIcon(Resource.Drawable.walk)
                 .SetOngoing(true)
                 .SetContentIntent(GetPendingIntent())
                 .Build();
