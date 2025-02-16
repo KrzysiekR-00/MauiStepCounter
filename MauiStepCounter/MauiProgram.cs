@@ -22,6 +22,8 @@ namespace MauiStepCounter
             builder.Logging.AddDebug();
 #endif
 
+            builder.Services.AddSingleton<ViewModels.MainPageViewModel>();
+
 #if ANDROID
             builder.Services.AddSingleton(Pedometer.Default);
 
