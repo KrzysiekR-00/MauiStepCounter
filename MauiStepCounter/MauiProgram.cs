@@ -27,15 +27,15 @@ namespace MauiStepCounter
 #if ANDROID
             builder.Services.AddSingleton(Pedometer.Default);
 
-            builder.Services.AddTransient<Services.IBackgroundService, Platforms.Android.Services.BackgroundService>();
-            builder.Services.AddTransient<Services.INotificationService, Platforms.Android.Services.NotificationService>();
-            builder.Services.AddTransient<Services.IPedometerService, Platforms.Android.Services.PedometerService>();
+            builder.Services.AddTransient<Abstraction.IBackgroundService, Platforms.Android.Services.BackgroundService>();
+            builder.Services.AddTransient<Abstraction.INotificationService, Platforms.Android.Services.NotificationService>();
+            builder.Services.AddTransient<ActivityCore.Abstraction.IPedometer, Platforms.Android.Services.PedometerService>();
 #endif
 
 #if WINDOWS
-            builder.Services.AddTransient<Services.IBackgroundService, Platforms.Windows.Services.DummyBackgroundService>();
-            builder.Services.AddTransient<Services.INotificationService, Platforms.Windows.Services.DummyNotificationService>();
-            builder.Services.AddTransient<Services.IPedometerService, Platforms.Windows.Services.DummyPedometerService>();
+            builder.Services.AddTransient<Abstraction.IBackgroundService, Platforms.Windows.Services.DummyBackgroundService>();
+            builder.Services.AddTransient<Abstraction.INotificationService, Platforms.Windows.Services.DummyNotificationService>();
+            builder.Services.AddTransient<ActivityCore.Abstraction.IPedometer, Platforms.Windows.Services.DummyPedometerService>();
 #endif
 
             return builder.Build();

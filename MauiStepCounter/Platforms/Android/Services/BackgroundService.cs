@@ -1,7 +1,7 @@
 ﻿using Android.App;
 using Android.Content;
 using Android.OS;
-using MauiStepCounter.Services;
+using MauiStepCounter.Abstraction;
 
 namespace MauiStepCounter.Platforms.Android.Services;
 

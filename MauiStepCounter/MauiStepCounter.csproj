@@ -67,4 +67,8 @@
 		<PackageReference Include="Plugin.Maui.Pedometer" Version="1.0.0-preview3" />
 	</ItemGroup>
 
+	<ItemGroup>
+	  <ProjectReference Include="..\ActivityCore\ActivityCore.csproj" />
+	</ItemGroup>
+
 </Project>

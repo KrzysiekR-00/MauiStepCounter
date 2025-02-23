@@ -1,11 +1,11 @@
-﻿using MauiStepCounter.Services;
+﻿using ActivityCore.Abstraction;
 
 namespace MauiStepCounter.Platforms.Windows.Services;
-internal class DummyPedometerService : IPedometerService
+internal class DummyPedometerService : IPedometer
 {
-    public bool IsActive { get; private set; } = false;
+    public event EventHandler<int>? StepsRegistered;
 
-    public Action<int>? StepsRegistered { get; set; }
+    public bool IsActive { get; private set; } = false;
 
     public void Start()
     {

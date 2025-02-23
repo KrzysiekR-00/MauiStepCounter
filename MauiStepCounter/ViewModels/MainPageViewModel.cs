@@ -1,7 +1,8 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
+﻿using ActivityCore.Abstraction;
+using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using MauiStepCounter.Abstraction;
 using MauiStepCounter.DataAccess;
-using MauiStepCounter.Services;
 using System.Globalization;
 
 namespace MauiStepCounter.ViewModels;
@@ -13,7 +14,7 @@ public partial class MainPageViewModel : ObservableObject
     [ObservableProperty]
     private string _log = "";
 
-    private readonly IPedometerService _pedometerService;
+    private readonly IPedometer _pedometerService;
     private readonly IBackgroundService _backgroundService;
     private readonly INotificationService _notificationService;
 
@@ -22,7 +23,7 @@ public partial class MainPageViewModel : ObservableObject
     private int _startSteps = 0;
 
     public MainPageViewModel(
-        IPedometerService pedometerService,
+        IPedometer pedometerService,
         IBackgroundService backgroundService,
         INotificationService notificationService
         )
@@ -33,15 +34,15 @@ public partial class MainPageViewModel : ObservableObject
         _backgroundService = backgroundService;
         _notificationService = notificationService;
 
-        _pedometerService.StepsRegistered += (steps) =>
-        {
-            CurrentSteps = _startSteps + steps;
+        //_pedometerService.StepsRegistered += (steps) =>
+        //{
+        //    CurrentSteps = _startSteps + steps;
 
-            //if (_backgroundService.IsActive) _backgroundService.SetTitle(CurrentSteps.ToString());
-            _notificationService.Show(CurrentSteps.ToString(), CurrentSteps.ToString());
+        //    //if (_backgroundService.IsActive) _backgroundService.SetTitle(CurrentSteps.ToString());
+        //    _notificationService.Show(CurrentSteps.ToString(), CurrentSteps.ToString());
 
-            WriteLogLine("steps: " + steps);
-        };
+        //    WriteLogLine("steps: " + steps);
+        //};
 
         Load();
     }

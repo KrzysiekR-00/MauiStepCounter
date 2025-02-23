@@ -1,4 +1,4 @@
-﻿using MauiStepCounter.Services;
+﻿using MauiStepCounter.Abstraction;
 
 namespace MauiStepCounter.Platforms.Windows.Services;
 public class DummyBackgroundService : IBackgroundService

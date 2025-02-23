@@ -1,14 +1,13 @@
-﻿using MauiStepCounter.Services;
-using Plugin.Maui.Pedometer;
+﻿using Plugin.Maui.Pedometer;
 
 namespace MauiStepCounter.Platforms.Android.Services;
-internal class PedometerService : IPedometerService
+internal class PedometerService : ActivityCore.Abstraction.IPedometer
 {
+    public event EventHandler<int>? StepsRegistered;
+
     private readonly IPedometer _pedometer;
 
     public bool IsActive { get; private set; }
-
-    public Action<int>? StepsRegistered { get; set; }
 
     public PedometerService(IPedometer pedometer)
     {
@@ -41,6 +40,6 @@ internal class PedometerService : IPedometerService
 
     private void PedometerReadingChanged(object? sender, PedometerData pedometerData)
     {
-        StepsRegistered?.Invoke(pedometerData.NumberOfSteps);
+        StepsRegistered?.Invoke(this, pedometerData.NumberOfSteps);
     }
 }

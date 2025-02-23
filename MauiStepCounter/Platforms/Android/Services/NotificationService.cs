@@ -1,5 +1,5 @@
 ﻿using AndroidX.Core.App;
-using MauiStepCounter.Services;
+using MauiStepCounter.Abstraction;
 
 namespace MauiStepCounter.Platforms.Android.Services;
 

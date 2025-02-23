@@ -1,4 +1,4 @@
-﻿namespace MauiStepCounter.Services;
+﻿namespace MauiStepCounter.Abstraction;
 public interface IDataAccess
 {
     void Save<T>(T dataToSave);
