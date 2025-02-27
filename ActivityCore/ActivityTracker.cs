@@ -4,11 +4,28 @@ using ActivityCore.Stats;
 namespace ActivityCore;
 public class ActivityTracker
 {
+    public event EventHandler<int>? CurrentHourStepsChanged;
+
     private readonly IPedometer _pedometer;
     private readonly IActivityStatsDataAccess _activityStatsDataAccess;
 
-    int _currentSteps = 0;
-    DateTime _lastStepsDateTime = DateTime.MinValue;
+    private int _currentSteps = 0;
+
+    private int CurrentSteps
+    {
+        get { return _currentSteps; }
+        set
+        {
+            if (_currentSteps != value)
+            {
+                _currentSteps = value;
+
+                CurrentHourStepsChanged?.Invoke(this, CurrentSteps);
+            }
+        }
+    }
+
+    private DateTime _lastStepsDateTime = DateTime.MinValue;
 
     public ActivityTracker(IPedometer pedometer, IActivityStatsDataAccess activityStatsDataAccess)
     {
@@ -26,7 +43,7 @@ public class ActivityTracker
     {
         var now = DateTime.Now;
 
-        if (_currentSteps > 0)
+        if (CurrentSteps > 0)
         {
             if (now.Hour > _lastStepsDateTime.Hour ||
                 now.Day > _lastStepsDateTime.Day ||
@@ -35,11 +52,11 @@ public class ActivityTracker
                 )
             {
                 SaveHourlySteps();
-                _currentSteps = 0;
+                CurrentSteps = 0;
             }
         }
 
-        _currentSteps += newSteps;
+        CurrentSteps += newSteps;
         _lastStepsDateTime = now;
     }
 
@@ -48,7 +65,7 @@ public class ActivityTracker
         HourlySteps hourlySteps = new(
             DateOnly.FromDateTime(_lastStepsDateTime),
             _lastStepsDateTime.Hour,
-            _currentSteps
+            CurrentSteps
             );
 
         _activityStatsDataAccess.SaveHourlySteps(hourlySteps);

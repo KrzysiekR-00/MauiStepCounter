@@ -1,4 +1,7 @@
-﻿using CommunityToolkit.Maui;
+﻿using ActivityCore;
+using ActivityCore.Abstraction;
+using ActivityCore.Stats;
+using CommunityToolkit.Maui;
 using Microsoft.Extensions.Logging;
 using Plugin.Maui.Pedometer;
 
@@ -23,6 +26,9 @@ namespace MauiStepCounter
 #endif
 
             builder.Services.AddSingleton<ViewModels.MainPageViewModel>();
+
+            builder.Services.AddSingleton<IActivityStatsDataAccess>(x => new ActivityStatsFileSystemDataAccess(FileSystem.Current.AppDataDirectory));
+            builder.Services.AddSingleton<ActivityTracker>();
 
 #if ANDROID
             builder.Services.AddSingleton(Pedometer.Default);

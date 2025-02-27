@@ -1,4 +1,5 @@
-﻿using ActivityCore.Abstraction;
+﻿using ActivityCore;
+using ActivityCore.Abstraction;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using MauiStepCounter.Abstraction;
@@ -20,12 +21,15 @@ public partial class MainPageViewModel : ObservableObject
 
     private readonly IDataAccess _dataAccess;
 
+    private readonly ActivityTracker _activityTracker;
+
     private int _startSteps = 0;
 
     public MainPageViewModel(
         IPedometer pedometerService,
         IBackgroundService backgroundService,
-        INotificationService notificationService
+        INotificationService notificationService,
+        ActivityTracker activityTracker
         )
     {
         _dataAccess = new FileSystemDataAccess();
@@ -45,6 +49,8 @@ public partial class MainPageViewModel : ObservableObject
         //};
 
         Load();
+
+        _activityTracker = activityTracker;
     }
 
     [RelayCommand]
