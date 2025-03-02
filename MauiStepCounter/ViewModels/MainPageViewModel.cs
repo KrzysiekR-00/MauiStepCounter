@@ -3,7 +3,6 @@ using ActivityCore.Abstraction;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using MauiStepCounter.Abstraction;
-using System.Globalization;
 
 namespace MauiStepCounter.ViewModels;
 public partial class MainPageViewModel : ObservableObject
@@ -46,23 +45,6 @@ public partial class MainPageViewModel : ObservableObject
 
             WriteLogLine($"{day} - {steps}");
         }
-    }
-
-    [RelayCommand]
-    private void ChangeLanguage()
-    {
-        CultureInfo? newCulture;
-
-        if (CultureInfo.CurrentCulture.Name.Contains("en", StringComparison.InvariantCultureIgnoreCase))
-        {
-            newCulture = CultureInfo.CreateSpecificCulture("pl-PL");
-        }
-        else
-        {
-            newCulture = CultureInfo.CreateSpecificCulture("en-US");
-        }
-
-        CultureInfo.CurrentUICulture = CultureInfo.CurrentCulture = CultureInfo.DefaultThreadCurrentUICulture = Thread.CurrentThread.CurrentUICulture = newCulture;
     }
 
     [RelayCommand]
