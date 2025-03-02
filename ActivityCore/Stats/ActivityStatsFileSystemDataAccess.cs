@@ -27,29 +27,88 @@ public class ActivityStatsFileSystemDataAccess : IActivityStatsDataAccess
             }
         }
 
-        string line = hourUniqueId + "," + hourlySteps.Steps.ToString() + Environment.NewLine;
+        string line = Serialize(hourUniqueId, hourlySteps.Steps);
 
         File.AppendAllText(filePath, line);
     }
 
-    private string HourUniqueId(int hour)
+    public HourlySteps LoadHourlySteps(DateOnly date, int hour)
+    {
+        var filePath = GetFilePath(date);
+
+        if (!File.Exists(_appDataDirectory))
+        {
+            return new HourlySteps(date, hour, 0);
+        }
+
+        var hourUniqueId = HourUniqueId(hour);
+
+        var line = File.ReadAllLines(filePath).Where(l => l.StartsWith(hourUniqueId)).FirstOrDefault();
+
+        if (line != null)
+        {
+            if (TryDeserializeStepsValue(line, out int steps))
+            {
+                return new HourlySteps(date, hour, steps);
+            }
+        }
+
+        return new HourlySteps(date, hour, 0);
+    }
+
+    public DailySteps LoadDailySteps(DateOnly date)
+    {
+        var filePath = GetFilePath(date);
+
+        if (!File.Exists(_appDataDirectory))
+        {
+            return new DailySteps(date, 0);
+        }
+
+        var lines = File.ReadAllLines(filePath);
+
+        int steps = 0;
+
+        foreach (var line in lines)
+        {
+            if (TryDeserializeStepsValue(line, out int hourlySteps))
+            {
+                steps += hourlySteps;
+            }
+        }
+
+        return new DailySteps(date, steps);
+    }
+
+    private static string HourUniqueId(int hour)
     {
         return hour.ToString().PadLeft(2, '0'); ;
+    }
+
+    private static string Serialize(string hourUniqueId, int steps)
+    {
+        return hourUniqueId + "," + steps.ToString() + Environment.NewLine;
+    }
+
+    private static bool TryDeserializeStepsValue(string line, out int steps)
+    {
+        var parts = line.Split(',');
+        if (parts.Length == 2)
+        {
+            if (int.TryParse(parts[1], out int _steps))
+            {
+                steps = _steps;
+                return true;
+            }
+        }
+
+        steps = 0;
+        return false;
     }
 
     private string GetFilePath(DateOnly date)
     {
         string fileName = date.ToString("yyyyMMdd") + "activity.txt";
         return Path.Combine(_appDataDirectory, fileName);
-    }
-
-    public HourlySteps LoadHourlySteps(DateOnly date, int hour)
-    {
-        throw new NotImplementedException();
-    }
-
-    public DailySteps LoadDailySteps(DateOnly date)
-    {
-        throw new NotImplementedException();
     }
 }

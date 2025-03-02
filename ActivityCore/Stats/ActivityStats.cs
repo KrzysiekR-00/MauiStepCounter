@@ -1,13 +1,18 @@
-﻿namespace ActivityCore.Stats;
-internal class ActivityStats
+﻿using ActivityCore.Abstraction;
+
+namespace ActivityCore.Stats;
+public class ActivityStats
 {
-    //private readonly ActivityTracker _activityTracker;
-    //private readonly IActivityStatsDataAccess _activityStatsDataAccess;
+    public event EventHandler<int>? CurrentDayStepsChanged;
 
-    //public ActivityStats(ActivityTracker activityTracker, IActivityStatsDataAccess activityStatsDataAccess)
-    //{
-    //    _activityTracker = activityTracker;
-    //    _activityStatsDataAccess = activityStatsDataAccess;
+    private readonly ActivityTracker _activityTracker;
+    private readonly IActivityStatsDataAccess _activityStatsDataAccess;
 
-    //}
+    public ActivityStats(ActivityTracker activityTracker, IActivityStatsDataAccess activityStatsDataAccess)
+    {
+        _activityTracker = activityTracker;
+        _activityStatsDataAccess = activityStatsDataAccess;
+    }
+
+
 }

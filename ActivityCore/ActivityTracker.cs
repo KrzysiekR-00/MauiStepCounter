@@ -1,26 +1,42 @@
 ﻿using ActivityCore.Abstraction;
 using ActivityCore.Stats;
+using System.ComponentModel;
 
 namespace ActivityCore;
-public class ActivityTracker
+public class ActivityTracker : INotifyPropertyChanged
 {
-    public event EventHandler<int>? CurrentHourStepsChanged;
+    public event PropertyChangedEventHandler? PropertyChanged;
 
     private readonly IPedometer _pedometer;
     private readonly IActivityStatsDataAccess _activityStatsDataAccess;
 
-    private int _currentSteps = 0;
+    private int _currentHourSteps = 0;
+    private int _currentDaySteps = 0;
 
-    private int CurrentSteps
+    public int CurrentHourSteps
     {
-        get { return _currentSteps; }
-        set
+        get { return _currentHourSteps; }
+        private set
         {
-            if (_currentSteps != value)
+            if (_currentHourSteps != value)
             {
-                _currentSteps = value;
+                _currentHourSteps = value;
 
-                CurrentHourStepsChanged?.Invoke(this, CurrentSteps);
+                OnPropertyChanged(nameof(CurrentHourSteps));
+            }
+        }
+    }
+
+    public int CurrentDaySteps
+    {
+        get { return _currentDaySteps; }
+        private set
+        {
+            if (_currentDaySteps != value)
+            {
+                _currentDaySteps = value;
+
+                OnPropertyChanged(nameof(CurrentDaySteps));
             }
         }
     }
@@ -32,18 +48,37 @@ public class ActivityTracker
         _pedometer = pedometer;
         _activityStatsDataAccess = activityStatsDataAccess;
 
+        var _lastStepsDateTime = DateTime.Now;
+        var currentDay = DateOnly.FromDateTime(_lastStepsDateTime);
+        var currentHour = _lastStepsDateTime.Hour;
+
+        CurrentHourSteps = activityStatsDataAccess.LoadHourlySteps(currentDay, currentHour).Steps;
+        CurrentDaySteps = activityStatsDataAccess.LoadDailySteps(currentDay).Steps;
+
         _pedometer.StepsRegistered += NewStepsRegistered;
+    }
+
+    ~ActivityTracker()
+    {
+        SaveHourlySteps();
+        CurrentHourSteps = 0;
+        CurrentDaySteps = 0;
     }
 
     public void Start() => _pedometer.Start();
     public void Stop() => _pedometer.Stop();
     public bool IsActive => _pedometer.IsActive;
 
+    protected void OnPropertyChanged(string propertyName)
+    {
+        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+    }
+
     private void NewStepsRegistered(object? sender, int newSteps)
     {
         var now = DateTime.Now;
 
-        if (CurrentSteps > 0)
+        if (CurrentHourSteps > 0)
         {
             if (now.Hour > _lastStepsDateTime.Hour ||
                 now.Day > _lastStepsDateTime.Day ||
@@ -52,11 +87,24 @@ public class ActivityTracker
                 )
             {
                 SaveHourlySteps();
-                CurrentSteps = 0;
+                CurrentHourSteps = 0;
             }
         }
 
-        CurrentSteps += newSteps;
+        if (CurrentDaySteps > 0)
+        {
+            if (now.Day > _lastStepsDateTime.Day ||
+                now.Month > _lastStepsDateTime.Month ||
+                now.Year > _lastStepsDateTime.Year
+                )
+            {
+                CurrentDaySteps = 0;
+            }
+        }
+
+        CurrentHourSteps += newSteps;
+        CurrentDaySteps += newSteps;
+
         _lastStepsDateTime = now;
     }
 
@@ -65,7 +113,7 @@ public class ActivityTracker
         HourlySteps hourlySteps = new(
             DateOnly.FromDateTime(_lastStepsDateTime),
             _lastStepsDateTime.Hour,
-            CurrentSteps
+            CurrentHourSteps
             );
 
         _activityStatsDataAccess.SaveHourlySteps(hourlySteps);

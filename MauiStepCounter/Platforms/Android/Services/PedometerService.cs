@@ -7,6 +7,8 @@ internal class PedometerService : ActivityCore.Abstraction.IPedometer
 
     private readonly IPedometer _pedometer;
 
+    private int _steps = 0;
+
     public bool IsActive { get; private set; }
 
     public PedometerService(IPedometer pedometer)
@@ -40,6 +42,11 @@ internal class PedometerService : ActivityCore.Abstraction.IPedometer
 
     private void PedometerReadingChanged(object? sender, PedometerData pedometerData)
     {
-        StepsRegistered?.Invoke(this, pedometerData.NumberOfSteps);
+        var stepsDelta = pedometerData.NumberOfSteps - _steps;
+        if (stepsDelta > 0)
+        {
+            _steps = pedometerData.NumberOfSteps;
+            StepsRegistered?.Invoke(this, stepsDelta);
+        }
     }
 }

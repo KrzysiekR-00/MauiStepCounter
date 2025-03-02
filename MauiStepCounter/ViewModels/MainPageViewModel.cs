@@ -3,54 +3,49 @@ using ActivityCore.Abstraction;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using MauiStepCounter.Abstraction;
-using MauiStepCounter.DataAccess;
 using System.Globalization;
 
 namespace MauiStepCounter.ViewModels;
 public partial class MainPageViewModel : ObservableObject
 {
-    [ObservableProperty]
-    private int _currentSteps = 0;
+    public ActivityTracker ActivityTracker { get; }
 
     [ObservableProperty]
     private string _log = "";
 
-    private readonly IPedometer _pedometerService;
     private readonly IBackgroundService _backgroundService;
     private readonly INotificationService _notificationService;
-
-    private readonly IDataAccess _dataAccess;
-
-    private readonly ActivityTracker _activityTracker;
-
-    private int _startSteps = 0;
+    private readonly IActivityStatsDataAccess _activityStatsDataAccess;
 
     public MainPageViewModel(
-        IPedometer pedometerService,
         IBackgroundService backgroundService,
         INotificationService notificationService,
-        ActivityTracker activityTracker
+        ActivityTracker activityTracker,
+        IActivityStatsDataAccess activityStatsDataAccess
         )
     {
-        _dataAccess = new FileSystemDataAccess();
-
-        _pedometerService = pedometerService;
         _backgroundService = backgroundService;
         _notificationService = notificationService;
+        _activityStatsDataAccess = activityStatsDataAccess;
 
-        //_pedometerService.StepsRegistered += (steps) =>
-        //{
-        //    CurrentSteps = _startSteps + steps;
+        ActivityTracker = activityTracker;
+        ActivityTracker.PropertyChanged += (_, _) =>
+        {
+            //_backgroundService
+            _notificationService.Show("Today steps", ActivityTracker.CurrentDaySteps.ToString());
+        };
 
-        //    //if (_backgroundService.IsActive) _backgroundService.SetTitle(CurrentSteps.ToString());
-        //    _notificationService.Show(CurrentSteps.ToString(), CurrentSteps.ToString());
+        var today = DateTime.Now;
+        int daysToShowStats = 3;
+        WriteLogLine("Registered steps:");
+        for (int i = 0; i <= daysToShowStats; i++)
+        {
+            var day = DateOnly.FromDateTime(today.AddDays(-i));
 
-        //    WriteLogLine("steps: " + steps);
-        //};
+            var steps = _activityStatsDataAccess.LoadDailySteps(day).Steps;
 
-        Load();
-
-        _activityTracker = activityTracker;
+            WriteLogLine($"{day} - {steps}");
+        }
     }
 
     [RelayCommand]
@@ -71,48 +66,27 @@ public partial class MainPageViewModel : ObservableObject
     }
 
     [RelayCommand]
-    private void StartPedometer()
+    private void StartActivityTracker()
     {
-        _pedometerService.Start();
-
-        WriteLogLine("Pedometer started");
-    }
-
-    [RelayCommand]
-    private void StartBackgroundService()
-    {
-        //_backgroundService.Start(CurrentSteps.ToString());
         _backgroundService.Start();
 
         WriteLogLine("Background service started");
+
+        ActivityTracker.Start();
+
+        WriteLogLine("Activity tracker started");
     }
 
     [RelayCommand]
-    private void StopBackgroundService()
+    private void StopActivityTracker()
     {
+        ActivityTracker.Start();
+
+        WriteLogLine("Activity tracker stopped");
+
         _backgroundService.Stop();
 
         WriteLogLine("Background service stopped");
-    }
-
-    [RelayCommand]
-    private void SaveData()
-    {
-        _dataAccess.Save(CurrentSteps);
-
-        WriteLogLine("Data saved");
-    }
-
-    private void Load()
-    {
-        if (_dataAccess.TryLoad(out int loadedData))
-        {
-            _startSteps = loadedData;
-
-            CurrentSteps = _startSteps;
-
-            WriteLogLine("Data loaded");
-        }
     }
 
     private void WriteLogLine(string message)
